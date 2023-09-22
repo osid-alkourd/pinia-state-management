@@ -22,24 +22,42 @@ export const useTasksStore = defineStore('taskStore', {
     },
     actions: {
 
-        addTask(task) {
+        async addTask(task) {
             this.tasks.push(task);
+            const res = await fetch('http://localhost:3000/tasks', {
+                method: 'POST',
+                body: JSON.stringify(task),
+                headers: { 'content-type': 'application/json' }
+            });
+            if (res.error) {
+                console.log(res.error)
+            }
+
         },
-        deleteTask(id) {
+        async deleteTask(id) {
             this.tasks = this.tasks.filter(task => task.id !== id)
+            const res = await fetch(`http://localhost:3000/tasks/${id}`, {
+                method: 'DELETE',
+            });
+
         },
-        toggleFav(id) {
+        async toggleFav(id) {
             const task = this.tasks.find(task => task.id === id);
             task.isFav = !task.isFav;
+            const res = await fetch(`http://localhost:3000/tasks/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({isFav: task.isFav}),
+                headers: {'content-type': 'application/json'}
+            });
         },
-        async getTasks(){
+        async getTasks() {
             this.isLoading = true;
             const res = await fetch('http://localhost:3000/tasks');
             const data = await res.json();
             this.tasks = data;
             this.isLoading = false;
-            console.log(data);
-         },
+            // console.log(data);
+        },
 
     }
 })
